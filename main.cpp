@@ -46,7 +46,7 @@ public:
 int main() {
     ks_err err;
     do {
-		err = ks_open(KS_ARCH_X86, KS_MODE_64, &ks);
+        err = ks_open(KS_ARCH_X86, KS_MODE_64, &ks);
         std::cout << "Loading Keystone" << std::endl;
     } while (err != KS_ERR_OK);
     
