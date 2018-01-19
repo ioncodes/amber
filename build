@@ -1,0 +1,2 @@
+#!/bin/sh
+g++ main.cpp -std=c++11 -lpistache -pthread -lkeystone -o amber
