@@ -1,6 +1,7 @@
 #include <pistache/endpoint.h>
 #include <keystone/keystone.h>
 #include <stdio.h>
+#include <iomanip>
 
 using namespace Pistache;
 
@@ -27,7 +28,10 @@ public:
                 } else {
                     std::stringstream ss;
                     for(int i = 0; i < size; i++) {
-                        ss << std::hex << int(encode[i]);
+                        ss << "0x" << std::setfill('0') << std::setw(2) << std::hex << int(encode[i]);
+                        if(i != size - 1) {
+                            ss << ",";
+                        }
                     }
                     response.send(Http::Code::Ok, ss.str(), MIME(Text, Plain));
                     ks_free(encode);
