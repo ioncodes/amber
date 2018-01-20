@@ -2,10 +2,14 @@
 #include <keystone/keystone.h>
 #include <stdio.h>
 #include <iomanip>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 using namespace Pistache;
 
 ks_engine *ks;
+Http::Endpoint *server;
 
 class HelloHandler : public Http::Handler {
 public:
@@ -58,21 +62,25 @@ int main() {
     auto opts = Pistache::Http::Endpoint::options()
         .threads(1);
 
-    Http::Endpoint server(addr);
-    server.init(opts);
-    server.setHandler(Http::make_handler<HelloHandler>());
+    server = new Http::Endpoint(addr);
+    server->init(opts);
+    server->setHandler(Http::make_handler<HelloHandler>());
 
     std::cout << "Server started!" << std::endl;
 
-    server.serve();
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = [](int s) -> void {
+        server->shutdown();
+        std::cout << "Server stopped!" << std::endl;
+        ks_close(ks);
+        std::cout << "Keystone unloaded!" << std::endl;
+        exit(EXIT_SUCCESS);
+    };
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
 
-    server.shutdown();
-
-    std::cout << "Server stopped!" << std::endl;
-
-    ks_close(ks);
-
-    std::cout << "Keystone unloaded!" << std::endl;
+    server->serve();
 
     return 0;
 }
